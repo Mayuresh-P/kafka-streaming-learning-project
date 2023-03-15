@@ -7,7 +7,6 @@ import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.Serializer;
 
 import java.io.Serializable;
-import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 

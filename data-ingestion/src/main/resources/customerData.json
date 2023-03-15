@@ -1,0 +1,62 @@
+[
+  {
+    "customerId": 1,
+    "gender": "male",
+    "name": "Odonnell Hebert",
+    "age": 38
+  },
+  {
+    "customerId": 2,
+    "gender": "male",
+    "name": "Adriana Parker",
+    "age": 36
+  },
+  {
+    "customerId": 3,
+    "gender": "male",
+    "name": "Aileen Johns",
+    "age": 25
+  },
+  {
+    "customerId": 4,
+    "gender": "female",
+    "name": "Stanley Terry",
+    "age": 31
+  },
+  {
+    "customerId": 5,
+    "gender": "female",
+    "name": "Maura Chapman",
+    "age": 38
+  },
+  {
+    "customerId": 6,
+    "gender": "male",
+    "name": "Bessie Underwood",
+    "age": 24
+  },
+  {
+    "customerId": 7,
+    "gender": "male",
+    "name": "Bradley Hernandez",
+    "age": 33
+  },
+  {
+    "customerId": 8,
+    "gender": "female",
+    "name": "York Collins",
+    "age": 21
+  },
+  {
+    "customerId": 9,
+    "gender": "male",
+    "name": "Jimmie Hull",
+    "age": 36
+  },
+  {
+    "customerId": 10,
+    "gender": "female",
+    "name": "Riley Baxter",
+    "age": 29
+  }
+]

@@ -12,13 +12,19 @@ public class ProducerUtils {
     public static final short REPLICATION_FACTOR = 3;
     public static final int PARTITIONS = 6;
 
-    public static Properties loadProperties() throws IOException {
+    public static Properties loadProperties() {
         Properties properties = new Properties();
-        try (FileInputStream fis = new FileInputStream("src/main/resources/producer.properties")) {
+        try (FileInputStream fis = new FileInputStream("data-ingestion\\src\\main\\resources\\producer.properties")) {
             properties.load(fis);
             return properties;
         }
+        catch (Exception e){
+            System.out.println("Properties not loaded");
+            return properties;
+        }
     }
+
+
 
     public static NewTopic createTopic(final String topicName){
         return new NewTopic(topicName, PARTITIONS, REPLICATION_FACTOR);

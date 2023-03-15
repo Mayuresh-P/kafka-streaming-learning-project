@@ -3,6 +3,8 @@ package org.pl.utils;
 
 import io.vertx.core.eventbus.impl.clustered.Serializer;
 import org.apache.kafka.clients.admin.Admin;
+import org.apache.kafka.clients.admin.ListTopicsOptions;
+import org.apache.kafka.clients.admin.ListTopicsResult;
 import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
@@ -15,6 +17,8 @@ import org.pl.entities.Customer;
 import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 public class TopicLoader {
@@ -30,10 +34,22 @@ public class TopicLoader {
 
         try(Admin adminClient = Admin.create(properties);
             Producer<String, String> producer = new KafkaProducer<>(properties)) {
-            final String inputTopic = properties.getProperty("ktable.input.topic");
-            final String outputTopic = properties.getProperty("ktable.output.topic");
-            var topics = List.of(ProducerUtils.createTopic(inputTopic), ProducerUtils.createTopic(outputTopic));
-            adminClient.createTopics(topics);
+            final String inputTopic = properties.getProperty("input.customer.topic");
+            final String outputTopic = properties.getProperty("input.output.topic");
+
+            var topicsToBeCreated = List.of("input.customer.topic", "input.sales.topic");
+            var topics = List.of(ProducerUtils.createTopic(inputTopic),
+                    ProducerUtils.createTopic(outputTopic)
+            );
+
+            ListTopicsOptions options = new ListTopicsOptions();
+            options.listInternal(true);
+            ListTopicsResult existingTopics = adminClient.listTopics(options);
+            Set<String> existingTopicNames = existingTopics.names().get();
+
+            Set<String> newTopics = existingTopicNames.stream().filter(topic -> !topicsToBeCreated.contains(topic)).collect(Collectors.toSet());
+            System.out.println(newTopics);
+//            adminClient.createTopics(topics);
 
             Callback callback = (metadata, exception) -> {
                 if(exception != null) {
@@ -55,6 +71,8 @@ public class TopicLoader {
             producerRecords.forEach((pr -> producer.send(pr, callback)));
 
 
+        } catch (ExecutionException | InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 }
