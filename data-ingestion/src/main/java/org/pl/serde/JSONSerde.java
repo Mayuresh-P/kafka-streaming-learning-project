@@ -6,12 +6,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.common.errors.SerializationException;
 import org.apache.kafka.common.header.Headers;
 import org.apache.kafka.common.serialization.Deserializer;
+import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serializer;
 import org.pl.entities.Customer;
 
 import java.util.Map;
 
-public class JSONSerde implements Serializer<JsonNode>, Deserializer<JsonNode> {
+public class JSONSerde implements Serializer<JsonNode>, Deserializer<JsonNode>, Serde<JsonNode> {
     private final ObjectMapper objectMapper = new ObjectMapper();
     @Override
     public JsonNode deserialize(String s, byte[] bytes) {
@@ -56,5 +57,15 @@ public class JSONSerde implements Serializer<JsonNode>, Deserializer<JsonNode> {
     @Override
     public void close() {
         Serializer.super.close();
+    }
+
+    @Override
+    public Serializer<JsonNode> serializer() {
+        return new JSONSerde();
+    }
+
+    @Override
+    public Deserializer<JsonNode> deserializer() {
+        return new JSONSerde();
     }
 }

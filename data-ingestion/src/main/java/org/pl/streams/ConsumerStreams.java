@@ -1,14 +1,13 @@
 package org.pl.streams;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.Consumed;
 import org.apache.kafka.streams.kstream.KStream;
-import org.pl.entities.Customer;
-import org.pl.serde.CustomerSerde;
-import org.pl.utils.ProducerUtils;
+import org.pl.serde.JSONSerde;
 
 import java.io.FileInputStream;
 import java.util.Properties;
@@ -43,7 +42,7 @@ public class ConsumerStreams {
     public static void consume(){
         Properties properties = loadProperties();
         properties.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.Integer().getClass());
-        properties.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Customer.class.getName());
+        properties.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, JSONSerde.class.getName());
         String inputTopic = properties.getProperty("input.customer.topic");
 
         final StreamsBuilder builder = new StreamsBuilder();
@@ -51,7 +50,7 @@ public class ConsumerStreams {
 
 
 
-        KStream<Integer, Customer> firstStream = builder.stream(inputTopic, Consumed.with(Serdes.Integer(), new CustomerSerde()));
+        KStream<Integer, JsonNode> firstStream = builder.stream(inputTopic, Consumed.with(Serdes.Integer(), new JSONSerde()));
         firstStream.peek((key, value) -> System.out.println("key "+key+" value "+value));
         KafkaStreams kafkaStreams =  new KafkaStreams(builder.build(), properties);
         kafkaStreams.start();

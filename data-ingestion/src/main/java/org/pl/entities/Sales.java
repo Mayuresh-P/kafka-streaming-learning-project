@@ -7,7 +7,7 @@ import java.time.Instant;
 public class Sales {
 
     @JsonProperty
-    private long salesId;
+    private int salesId;
 
     @JsonProperty
     private Instant timestamp;
@@ -16,18 +16,18 @@ public class Sales {
     private int productId;
 
     @JsonProperty
-    private long customerId;
+    private int customerId;
 
     @JsonProperty
-    private long quantity;
+    private int quantity;
 
     @JsonProperty
-    private long price;
+    private int price;
 
     @JsonProperty
     private String productCategory;
 
-    public Sales(int salesId, Instant timestamp, int productId, int customerId, String productCategory, long quantity, long price) {
+    public Sales(int salesId, Instant timestamp, int productId, int customerId, String productCategory, int quantity, int price) {
         this.salesId = salesId;
         this.timestamp = timestamp;
         this.productId = productId;
@@ -35,6 +35,10 @@ public class Sales {
         this.quantity = quantity;
         this.productCategory = productCategory;
         this.price = price;
+    }
+
+    public Sales() {
+
     }
 
 }
