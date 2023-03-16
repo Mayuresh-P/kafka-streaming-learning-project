@@ -4,10 +4,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.Instant;
 
-public class Order {
+public class Sales {
 
     @JsonProperty
-    private long orderId;
+    private long salesId;
 
     @JsonProperty
     private Instant timestamp;
@@ -27,8 +27,8 @@ public class Order {
     @JsonProperty
     private String productCategory;
 
-    public Order(int orderId, Instant timestamp, int productId, int customerId, String productCategory, long quantity, long price) {
-        this.orderId = orderId;
+    public Sales(int salesId, Instant timestamp, int productId, int customerId, String productCategory, long quantity, long price) {
+        this.salesId = salesId;
         this.timestamp = timestamp;
         this.productId = productId;
         this.customerId = customerId;
