@@ -1,92 +1,92 @@
 [
   {
-    "saleId": 100,
-    "timestamp": "Tue Mar 14 2023 13:51:50 GMT+0530 (India Standard Time)",
-    "productId": 336,
+    "salesId": 100,
+    "timestamp": "2023-03-15T09:41:18.558143900Z",
+    "productId": 609,
     "customerId": 1,
-    "quantity": 43,
-    "price": 31118,
-    "productCategory": "health"
+    "quantity": 22,
+    "price": 18712,
+    "productCategory": "Beauty"
   },
   {
-    "saleId": 101,
-    "timestamp": "Fri Mar 10 2023 08:55:20 GMT+0530 (India Standard Time)",
-    "productId": 566,
+    "salesId": 101,
+    "timestamp": "2023-03-15T09:41:18.558143900Z",
+    "productId": 692,
     "customerId": 2,
-    "quantity": 90,
-    "price": 75586,
-    "productCategory": "beauty"
+    "quantity": 68,
+    "price": 58944,
+    "productCategory": "books"
   },
   {
-    "saleId": 102,
-    "timestamp": "Fri Mar 03 2023 21:33:50 GMT+0530 (India Standard Time)",
-    "productId": 170,
+    "salesId": 102,
+    "timestamp": "2023-03-14T09:41:18.558143900Z",
+    "productId": 127,
     "customerId": 3,
-    "quantity": 15,
-    "price": 92078,
-    "productCategory": "books"
+    "quantity": 75,
+    "price": 43961,
+    "productCategory": "Beauty"
   },
   {
-    "saleId": 103,
-    "timestamp": "Mon Mar 06 2023 09:41:57 GMT+0530 (India Standard Time)",
-    "productId": 227,
+    "salesId": 103,
+    "timestamp": "2023-03-14T09:41:18.558143900Z",
+    "productId": 308,
     "customerId": 4,
-    "quantity": 71,
-    "price": 86181,
-    "productCategory": "health"
+    "quantity": 66,
+    "price": 81050,
+    "productCategory": "Health"
   },
   {
-    "saleId": 104,
-    "timestamp": "Tue Mar 14 2023 16:05:47 GMT+0530 (India Standard Time)",
-    "productId": 703,
+    "salesId": 104,
+    "timestamp": "2023-03-15T09:41:18.558143900Z",
+    "productId": 666,
     "customerId": 5,
-    "quantity": 10,
-    "price": 47358,
+    "quantity": 81,
+    "price": 67175,
+    "productCategory": "Health"
+  },
+  {
+    "salesId": 105,
+    "timestamp": "2023-03-16T09:41:18.558143900Z",
+    "productId": 270,
+    "customerId": 6,
+    "quantity": 39,
+    "price": 69834,
+    "productCategory": "Beauty"
+  },
+  {
+    "salesId": 106,
+    "timestamp": "2023-03-14T09:41:18.558143900Z",
+    "productId": 176,
+    "customerId": 7,
+    "quantity": 71,
+    "price": 8955,
     "productCategory": "books"
   },
   {
-    "saleId": 105,
-    "timestamp": "Thu Mar 09 2023 07:02:02 GMT+0530 (India Standard Time)",
-    "productId": 187,
-    "customerId": 6,
-    "quantity": 58,
-    "price": 82814,
-    "productCategory": "electronics"
-  },
-  {
-    "saleId": 106,
-    "timestamp": "Mon Mar 06 2023 11:13:48 GMT+0530 (India Standard Time)",
-    "productId": 564,
-    "customerId": 7,
-    "quantity": 41,
-    "price": 89839,
-    "productCategory": "beauty"
-  },
-  {
-    "saleId": 107,
-    "timestamp": "Tue Mar 07 2023 09:54:28 GMT+0530 (India Standard Time)",
-    "productId": 747,
+    "salesId": 107,
+    "timestamp": "2023-03-14T09:41:18.558143900Z",
+    "productId": 614,
     "customerId": 8,
-    "quantity": 76,
-    "price": 93266,
-    "productCategory": "health"
+    "quantity": 50,
+    "price": 22658,
+    "productCategory": "Health"
   },
   {
-    "saleId": 108,
-    "timestamp": "Sun Mar 05 2023 12:16:04 GMT+0530 (India Standard Time)",
-    "productId": 288,
+    "salesId": 108,
+    "timestamp": "2023-03-14T09:41:18.558143900Z",
+    "productId": 680,
     "customerId": 9,
-    "quantity": 11,
-    "price": 18533,
-    "productCategory": "beauty"
+    "quantity": 1,
+    "price": 43826,
+    "productCategory": "books"
   },
   {
-    "saleId": 109,
-    "timestamp": "Sun Mar 05 2023 12:17:19 GMT+0530 (India Standard Time)",
-    "productId": 366,
+    "salesId": 109,
+    "timestamp": "2023-03-15T09:41:18.558143900Z",
+    "productId": 591,
     "customerId": 10,
-    "quantity": 86,
-    "price": 92231,
-    "productCategory": "health"
+    "quantity": 34,
+    "price": 61320,
+    "productCategory": "Electronics"
   }
 ]
