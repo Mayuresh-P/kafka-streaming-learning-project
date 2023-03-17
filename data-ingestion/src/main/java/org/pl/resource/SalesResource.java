@@ -26,19 +26,7 @@ public class SalesResource {
     public Response postSales() throws IOException {
 
         DataIngestionProducer dataIngestionProducer = new DataIngestionProducer();
-//
-//        if(sale.getTimestamp() == null) {
-//            sale.setTimestamp(Instant.now());
-//        }
-//
-//        if(sale.getCustomerGender().toLowerCase() == "m" || sale.getCustomerGender().toLowerCase() == "male") {
-//            sale.setCustomerGender("MALE");
-//        } else {
-//            sale.setCustomerGender("FEMALE");
-//        }
-//
-//        log.info(sale.toString());
-//
+
         dataIngestionProducer.produce();
 
         return Response.accepted().build();
