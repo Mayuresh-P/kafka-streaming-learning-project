@@ -1,16 +1,8 @@
 package org.pl.entities;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.kafka.common.header.Headers;
-import org.apache.kafka.common.serialization.Deserializer;
-import org.apache.kafka.common.serialization.Serializer;
-
-import java.io.Serializable;
-import java.util.Map;
 
 
-public class Customer implements Serializable, Serializer, Deserializer {
+public class Customer   {
 
     @JsonProperty("id")
     private int customerId;
@@ -65,60 +57,6 @@ public class Customer implements Serializable, Serializer, Deserializer {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public void configure(Map configs, boolean isKey) {
-
-    }
-
-
-    public byte[] serialize(String s, Object c) {
-        byte[] retVal = null;
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            retVal = objectMapper.writeValueAsString(c).getBytes();
-        } catch (Exception e){
-            e.printStackTrace();
-        }
-
-        return retVal;
-    }
-
-//    @Override
-//    public byte[] serialize(String s, Object o) {
-//        return new byte[0];
-//    }
-
-    @Override
-    public byte[] serialize(String topic, Headers headers, Object data) {
-        return Serializer.super.serialize(topic, headers, data);
-    }
-
-    @Override
-    public void close() {
-
-    }
-
-//    public byte[] serialize(String topic, Headers headers, Object data) {
-//        return new byte[0];
-//    }
-
-    @Override
-    public Customer deserialize(String s, byte[] bytes) {
-        ObjectMapper mapper = new ObjectMapper();
-        Customer customer = null;
-        try{
-            customer = mapper.readValue(bytes, Customer.class);
-
-        } catch (Exception e){
-            e.printStackTrace();
-        }
-        return customer;
-    }
-
-    @Override
-    public Object deserialize(String topic, Headers headers, byte[] data) {
-        return Deserializer.super.deserialize(topic, headers, data);
     }
 
 

@@ -26,9 +26,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ProducerNew {
@@ -102,6 +100,13 @@ public class ProducerNew {
             org.apache.kafka.clients.producer.Producer<Integer, JsonNode> producer = new KafkaProducer<>(properties)) {
             final String inputCustomerTopic = properties.getProperty("input.customer.topic");
             final String inputSalesTopic = properties.getProperty("input.sales.topic");
+            final String customerSalesTopic = properties.getProperty("join.customersales.topic");
+
+            List<String> topicsToBeCreated = Arrays.asList(inputCustomerTopic, inputSalesTopic, customerSalesTopic);
+            List<String> existingTopics = new ArrayList<>(adminClient.listTopics().names().get());
+            List<String> createTopics = topicsToBeCreated.stream().filter(topic -> !existingTopics.contains(topic)).collect(Collectors.toList());
+            adminClient.createTopics(createTopics.stream().map(ProducerUtils::createTopic).collect(Collectors.toList()));
+            topicsToBeCreated.stream().peek(each -> System.out.println(each));
             List<ProducerRecord<Integer,JsonNode>> records = allCustomers.stream()
                     .map(customer -> new ProducerRecord<>(inputCustomerTopic, customer.getCustomerId(), mapper.convertValue(customer, JsonNode.class)))
                     .collect(Collectors.toList());
@@ -111,6 +116,9 @@ public class ProducerNew {
                     .collect(Collectors.toList()));
             records.forEach(record -> producer.send(record, callback));
             producer.close(Duration.ofSeconds(5));
+        }
+        catch (Exception e){
+            e.printStackTrace();
         }
     }
 }
