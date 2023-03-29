@@ -1,0 +1,24 @@
+{
+  "type":"object",
+  "javaType" : "org.pl.entities.Sales",
+  "properties": {
+    "orderId": {
+      "type": "int"
+    },
+    "productId": {
+      "type": "int"
+    },
+    "productCategory": {
+      "type": "string"
+    },
+    "customerId": {
+      "type": "int"
+    },
+    "quantity": {
+      "type": "long"
+    },
+    "price": {
+      "type": "long"
+    }
+  }
+}
