@@ -48,6 +48,19 @@ public class CustomerSales {
         this.productCategory = productCategory;
     }
 
+    public CustomerSales(Customer customer, Sales sales){
+        this.customerId = customer.getCustomerId();
+        this.gender = customer.getGender();
+        this.age = customer.getAge();
+        this.name = customer.getName();
+        this.salesId = sales.getSalesId();
+        this.timestamp = sales.getTimestamp();
+        this.productId = sales.getProductId();
+        this.quantity = sales.getQuantity();
+        this.price = sales.getPrice();
+        this.productCategory = sales.getProductCategory();
+    }
+
     public CustomerSales() {
     }
 

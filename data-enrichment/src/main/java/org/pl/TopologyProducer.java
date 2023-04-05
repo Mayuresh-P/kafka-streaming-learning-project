@@ -12,6 +12,7 @@ import org.apache.kafka.streams.processor.Processor;
 import org.apache.kafka.streams.processor.api.ProcessorSupplier;
 import org.apache.kafka.streams.state.*;
 import org.pl.entities.Customer;
+import org.pl.entities.CustomerSales;
 import org.pl.entities.Sales;
 import org.pl.joiner.SalesCustomerJoiner;
 import org.pl.serde.JSONSerde;
@@ -54,15 +55,17 @@ public class TopologyProducer {
 
 
         salesStream.join(customers,
-                (salesKey, salesValue) -> salesValue.get("id").asInt(),
+                (salesKey, salesValue) -> salesValue.get("customerId").asInt(),
                 (salesValue, customerValue) -> mapper.convertValue(
-                        new SalesCustomerJoiner().apply(
-                                mapper.convertValue(salesValue, Sales.class),
-                                mapper.convertValue(customerValue, Customer.class)),
-                        JsonNode.class))
+                        new CustomerSales(
+                                mapper.convertValue(customerValue, Customer.class),
+                                mapper.convertValue(salesValue, Sales.class)
+                        ),   JsonNode.class))
                 .peek(loggingForEach)
                 .to("customer-sales", Produced.with(Serdes.Integer(), new JSONSerde()));
 
+
+//        builder.stream("customer-sales").
 
 
         Topology build = builder.build();
