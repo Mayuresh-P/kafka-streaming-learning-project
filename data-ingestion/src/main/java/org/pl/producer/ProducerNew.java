@@ -59,6 +59,7 @@ public class ProducerNew {
         }
         return  null;
     }
+
     public static List<Customer> readCustomersFromFile(){
         JSONParser jsonParser =  new JSONParser();
         try(FileReader customerReader = new FileReader("data-ingestion\\src\\main\\resources\\customerData.json"); FileReader salesReader = new FileReader("data-ingestion\\src\\main\\resources\\salesData.json")){

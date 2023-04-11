@@ -21,7 +21,7 @@ public class CustomerResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response appendCustomers (@Valid Customer customer){
 //        customers.add(customer);
-        Producer.produceToCustomer(customer);
+//        Producer.produceToCustomer(customer);
         return Response.ok(customer).build();
     }
 
