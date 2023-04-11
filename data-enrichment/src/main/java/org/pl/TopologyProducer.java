@@ -54,7 +54,9 @@ public class TopologyProducer {
         final KStream<Integer, JsonNode> salesStream = builder.stream(SALES_TOPIC, Consumed.with(Serdes.Integer(),new JSONSerde()));
 
 
-        salesStream.join(customers,
+        salesStream
+                .selectKey((key, value) -> value.get("customerId").asInt())
+                .join(customers,
                 (salesKey, salesValue) -> salesValue.get("customerId").asInt(),
                 (salesValue, customerValue) -> mapper.convertValue(
                         new CustomerSales(
