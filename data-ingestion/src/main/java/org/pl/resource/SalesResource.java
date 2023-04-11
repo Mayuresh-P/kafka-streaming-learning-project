@@ -1,19 +1,16 @@
 package org.pl.resource;
 
-import org.pl.entities.Sales;
 import org.pl.producer.DataIngestionProducer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.transaction.Transactional;
-import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
-import java.time.Instant;
 
 @Path("/api/sales")
 @Transactional(Transactional.TxType.SUPPORTS)

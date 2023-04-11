@@ -21,7 +21,6 @@ public class JSONSerde implements Serializer<JsonNode>, Deserializer<JsonNode> {
         } catch (Exception e){
             e.printStackTrace();
         }
-//        return customer;
         return deserialized;
     }
 
@@ -56,4 +55,5 @@ public class JSONSerde implements Serializer<JsonNode>, Deserializer<JsonNode> {
     public void close() {
         Serializer.super.close();
     }
+
 }

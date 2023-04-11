@@ -2,11 +2,25 @@ package org.pl.entities;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
 @Data
-public class Sales {
+@NoArgsConstructor
+public class AllData {
+
+    @JsonProperty
+    private int customerId;
+
+    @JsonProperty
+    private String gender;
+
+    @JsonProperty
+    private int age;
+
+    @JsonProperty
+    private String name;
 
     @JsonProperty
     private int salesId;
@@ -18,9 +32,6 @@ public class Sales {
     private int productId;
 
     @JsonProperty
-    private int customerId;
-
-    @JsonProperty
     private int quantity;
 
     @JsonProperty
@@ -28,9 +39,5 @@ public class Sales {
 
     @JsonProperty
     private String productCategory;
-
-    public Sales() {
-    }
-
 
 }

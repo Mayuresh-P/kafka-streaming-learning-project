@@ -7,17 +7,16 @@ import org.apache.kafka.clients.producer.*;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+import org.pl.entities.Customer;
 import org.pl.entities.Sales;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
@@ -36,18 +35,38 @@ public class DataIngestionProducer {
 
     }
 
-    public static List<Sales> readFromFile() {
+    public static List<Sales> readFromFileForSales() {
         JSONParser parser = new JSONParser();
-        try(FileReader reader = new FileReader("C:\\Users\\msantosh\\Projects\\Quarkus Projects\\kafka-streaming-learning-project\\data-ingestion\\src\\main\\resources\\data.json")) {
+        try(FileReader reader = new FileReader("src\\main\\resources\\salesData.json")) {
             Object obj = parser.parse(reader);
             JSONArray listSales = (JSONArray) obj;
 
-            List<Sales> allSales = (List<Sales>) listSales.stream().map(sale -> parseSales( (JSONObject) sale)).collect(Collectors.toList());
-            return allSales;
+            return (List<Sales>) listSales.stream().map(sale -> parseSales( (JSONObject) sale)).collect(Collectors.toList());
         } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public static List<Customer> readFromFileForCustomer() {
+        JSONParser parser = new JSONParser();
+        try(FileReader reader = new FileReader("src\\main\\resources\\customerData.json")) {
+            Object obj = parser.parse(reader);
+            JSONArray listCustomer = (JSONArray) obj;
+
+            return (List<Customer>) listCustomer.stream().map(customer -> parseCustomer( (JSONObject) customer)).collect(Collectors.toList());
+        } catch (IOException | ParseException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static Object parseCustomer(JSONObject customerObject) {
+
+        Gson gson = new Gson();
+        Customer customer = gson.fromJson(String.valueOf(customerObject), Customer.class);
+
+        return customer;
+
     }
 
     private static Object parseSales(JSONObject saleObj) {
@@ -65,39 +84,125 @@ public class DataIngestionProducer {
         // load producer properties
         Properties properties = loadProperties();
 
-        // setup new kafka producer
-        KafkaProducer<Integer, JsonNode> producer = new KafkaProducer<>(properties);
+        // setup new kafka producer for sales
+        KafkaProducer<Integer, JsonNode> salesProducer = new KafkaProducer<>(properties);
 
-        // send data
-        List<Sales> allSales = readFromFile();
+        // setup new kafka producer for customer
+        KafkaProducer<Integer, JsonNode> customerProducer = new KafkaProducer<>(properties);
 
-        String inputTopic = properties.getProperty("input.sales.topic");
+        // get data from file
+        List<Sales> allSales = readFromFileForSales();
 
-        List<ProducerRecord<Integer, JsonNode>> records = allSales
+        // get customer data from file
+        List<Customer> allCustomer = readFromFileForCustomer();
+
+        String customerInputTopic = properties.getProperty("input.customer.topic");
+
+        String salesInputTopic = properties.getProperty("input.sales.topic");
+
+        // create a producer record for sales
+        List<ProducerRecord<Integer, JsonNode>> salesRecords = allSales
                 .stream()
                 .map(
-                        sale -> new ProducerRecord<>(inputTopic, sale.getSalesId(), mapper.convertValue(sale, JsonNode.class))
+                        sale -> new ProducerRecord<>(salesInputTopic, sale.getSalesId(), mapper.convertValue(sale, JsonNode.class))
                 )
                 .collect(Collectors.toList());
 
-
-        records.forEach(record -> producer.send(record, (metadata, exception) -> {
+        // send data to topic
+        salesRecords.forEach(record -> salesProducer.send(record, (metadata, exception) -> {
 
             if (exception == null) {
-
+                log.info("Key: " + record.key());
             } else {
-                log.info("Error while producing: " + exception);
+                log.error("Error while producing: " + exception);
             }
         }));
 
-        producer.close();
+        //create a producer record for customer
+        List<ProducerRecord<Integer, JsonNode>> customerRecords = allCustomer
+                .stream()
+                        .map(
+                                customer -> new ProducerRecord<>(customerInputTopic, customer.getCustomerId(), mapper.convertValue(customer, JsonNode.class))
+                        )
+                                .collect(Collectors.toList());
+
+        // send data to customer topic
+        customerRecords.forEach(record -> customerProducer.send(record, ((metadata, exception) -> {
+
+            if(exception == null) {
+                log.info("Key: " + record.key());
+            } else {
+                log.error("Error while producing: " + exception);
+            }
+        })));
+
+        salesProducer.close();
+
+        customerProducer.close();
 
     }
 
-    public static void main(String[] args) {
-        System.out.println(Instant.now());
-        ZonedDateTime z = Instant.now().atZone(ZoneId.systemDefault());
-        System.out.println(z);
+    public void produceCustomer(Customer customer) throws IOException, NullPointerException {
+
+        ObjectMapper mapper = new ObjectMapper();
+
+        // load producer properties
+        Properties properties = loadProperties();
+
+        // setup new kafka producer for customer
+        KafkaProducer<Integer, JsonNode> customerProducer = new KafkaProducer<>(properties);
+
+        String customerInputTopic = properties.getProperty("input.customer.topic");
+
+        //create a producer record for customer
+        ProducerRecord<Integer, JsonNode> customerProducerRecord = new ProducerRecord<>(
+                customerInputTopic, customer.getCustomerId(), mapper.convertValue(customer, JsonNode.class));
+
+        // produce data to customer topic
+        customerProducer.send(customerProducerRecord, ((metadata, exception) -> {
+
+            if(exception == null) {
+                log.info("Key: " + customerProducerRecord.key());
+            } else {
+                log.error("Error while producing: " + exception);
+            }
+        }));
+
+        // close the producer
+        customerProducer.close();
+
+    }
+
+    public void produceSales(Sales sale) throws IOException {
+
+        ObjectMapper mapper = new ObjectMapper();
+
+        // load producer properties
+        Properties properties = loadProperties();
+
+        // setup new kafka producer for sales
+        KafkaProducer<Integer, JsonNode> salesProducer = new KafkaProducer<>(properties);
+
+        String salesInputTopic = properties.getProperty("input.sales.topic");
+
+        // create a producer record for sales
+        ProducerRecord<Integer, JsonNode> salesProducerRecord = new ProducerRecord<>(
+                salesInputTopic, sale.getSalesId(), mapper.convertValue(sale, JsonNode.class)
+        );
+
+        // produce data to customer topic
+        salesProducer.send(salesProducerRecord, ((metadata, exception) -> {
+
+            if(exception == null) {
+                log.info("Key: " + salesProducerRecord.key());
+            } else {
+                log.error("Error while producing: " + exception);
+            }
+        }));
+
+        // close the producer
+        salesProducer.close();
+
     }
 
 }
