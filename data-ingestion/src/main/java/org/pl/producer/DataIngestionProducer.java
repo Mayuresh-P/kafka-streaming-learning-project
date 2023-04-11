@@ -142,7 +142,7 @@ public class DataIngestionProducer {
 
     }
 
-    public void produceCustomer(Customer customer) throws IOException, NullPointerException {
+    public void produceCustomer(Customer customer) throws IOException {
 
         ObjectMapper mapper = new ObjectMapper();
 

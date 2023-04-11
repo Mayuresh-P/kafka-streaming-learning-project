@@ -1,0 +1,11 @@
+[
+  {
+    "salesId": 22,
+    "productId": 102,
+    "customerId": 12,
+    "productCategory": "Sports",
+    "quantity": 100,
+    "price": 1090,
+    "timestamp": "2023-03-22T01:44:15.409074500Z"
+  }
+]
