@@ -1,20 +1,17 @@
 package org.pl;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.common.serialization.Serdes;
-import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.kstream.*;
-import org.apache.kafka.streams.processor.Processor;
-import org.apache.kafka.streams.processor.api.ProcessorSupplier;
 import org.apache.kafka.streams.state.*;
 import org.pl.entities.Customer;
 import org.pl.entities.CustomerSales;
 import org.pl.entities.Sales;
-import org.pl.joiner.SalesCustomerJoiner;
+import org.pl.entities.TotalSalesByCategory;
+import org.pl.serde.CustomSerde;
 import org.pl.serde.JSONSerde;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,11 +29,34 @@ public class TopologyProducer {
 
     private static final String SALES_CUSTOMER_STORE = "customer-sales-store";
 
-    final ForeachAction<Integer, JsonNode> loggingForEach = (key, value) -> {
+    final ForeachAction<Integer, CustomerSales> loggingForEach = (key, value) -> {
         if (value != null)
             logger.info("Key: {}, Value: {}", key, value);
     };
 
+
+//    private static Serde<Customer> createCustomerSerde(){
+//        Serializer<Customer> tSerializer = new JsonSerializer<Customer>();
+//        Deserializer<Customer> tDeserializer = new JsonDeserializer<>(Customer.class);
+//        return Serdes.serdeFrom(tSerializer, tDeserializer);
+//    }
+//    private static Serde<Sales> createSalesSerde(){
+//        Serializer<Sales> tSerializer = new JsonSerializer<>();
+//        Deserializer<Sales> tDeserializer = new JsonDeserializer<>(Sales.class);
+//        return Serdes.serdeFrom(tSerializer, tDeserializer);
+//    }
+//
+//    private static Serde<CustomerSales> createCustomerSalesSerde(){
+//        Serializer<CustomerSales> tSerializer = new JsonSerializer<>();
+//        Deserializer<CustomerSales> tDeserializer = new JsonDeserializer<>(CustomerSales.class);
+//        return Serdes.serdeFrom(tSerializer, tDeserializer);
+//    }
+
+    private static final CustomSerde<Customer> customerSerde = new CustomSerde<>(Customer.class);
+    private static final CustomSerde<Sales> salesSerde = new CustomSerde<>(Sales.class);
+    private static final CustomSerde<CustomerSales> customerSalesSerde = new CustomSerde<>(CustomerSales.class);
+
+    private static final CustomSerde<TotalSalesByCategory> totalSalesByCategorySerde = new CustomSerde<>(TotalSalesByCategory.class);
 
     @Produces
     public Topology buildTopology() {
@@ -46,34 +66,42 @@ public class TopologyProducer {
 
         final ObjectMapper mapper = new ObjectMapper();
 
-        final GlobalKTable<Integer, JsonNode> customers = builder.globalTable(CUSTOMER_TOPIC, Materialized.<Integer, JsonNode>as(storeSupplier)
+        final GlobalKTable<Integer, Customer> customers = builder.globalTable(CUSTOMER_TOPIC, Materialized.<Integer, Customer>as(storeSupplier)
                 .withKeySerde(Serdes.Integer())
-                .withValueSerde(new JSONSerde())
+                .withValueSerde(customerSerde.generateSerde())
         );
 
-        final KStream<Integer, JsonNode> salesStream = builder.stream(SALES_TOPIC, Consumed.with(Serdes.Integer(),new JSONSerde()));
+        final KStream<Integer, Sales> salesStream = builder.stream(SALES_TOPIC, Consumed.with(Serdes.Integer(),salesSerde.generateSerde()));
 
 
         salesStream
-                .selectKey((key, value) -> value.get("customerId").asInt())
+                .selectKey((key, value) -> value.getCustomerId())
                 .join(customers,
-                (salesKey, salesValue) -> salesValue.get("customerId").asInt(),
-                (salesValue, customerValue) -> mapper.convertValue(
+                (salesKey, salesValue) -> salesValue.getCustomerId(),
+                (salesValue, customerValue) ->
                         new CustomerSales(
                                 mapper.convertValue(customerValue, Customer.class),
                                 mapper.convertValue(salesValue, Sales.class)
-                        ),   JsonNode.class))
+                        ))
                 .peek(loggingForEach)
-                .to("customer-sales", Produced.with(Serdes.Integer(), new JSONSerde()));
+                .to("customer-sales", Produced.with(Serdes.Integer(), customerSalesSerde.generateSerde()));
 
 
-//        builder.stream("customer-sales").
+        KStream<String, TotalSalesByCategory> totalSalesByCategoryKStream = builder.stream("customer-sales",
+                Consumed.with(Serdes.Integer(), customerSalesSerde.generateSerde()))
+                .groupBy((key, customerSales) -> customerSales.getProductCategory())
+                .aggregate(
+                        () -> new TotalSalesByCategory(),
+                        (key, value, aggregatedValue) -> new TotalSalesByCategory(key, aggregatedValue.getTotalSales()+(value.getQuantity()*value.getPrice())),
+                        Materialized.with(Serdes.String(), totalSalesByCategorySerde.generateSerde())
+                )
+                .toStream()
+                .peek((key, value) -> System.out.println(key+ " "+ value));
 
+        totalSalesByCategoryKStream.to("total-sales-by-category",Produced.with(Serdes.String(), totalSalesByCategorySerde.generateSerde()));
 
         Topology build = builder.build();
         logger.info(build.describe().toString());
-
-
         return build;
     }
 }
