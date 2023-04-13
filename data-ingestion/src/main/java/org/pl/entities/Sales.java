@@ -32,5 +32,7 @@ public class Sales {
     public Sales() {
     }
 
-
+    public void setProductCategory(String productCategory) {
+        this.productCategory = productCategory;
+    }
 }

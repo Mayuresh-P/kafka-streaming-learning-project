@@ -24,7 +24,7 @@ public class SalesResource {
 
         DataIngestionProducer dataIngestionProducer = new DataIngestionProducer();
 
-        dataIngestionProducer.produce();
+//        dataIngestionProducer.produce();
 
         return Response.accepted().build();
     }

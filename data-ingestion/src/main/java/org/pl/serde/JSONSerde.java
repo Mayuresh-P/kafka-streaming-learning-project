@@ -1,7 +1,9 @@
 package org.pl.serde;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.common.errors.SerializationException;
 import org.apache.kafka.common.header.Headers;
@@ -11,7 +13,9 @@ import org.apache.kafka.common.serialization.Serializer;
 import java.util.Map;
 
 public class JSONSerde implements Serializer<JsonNode>, Deserializer<JsonNode> {
+
     private final ObjectMapper objectMapper = new ObjectMapper();
+
     @Override
     public JsonNode deserialize(String s, byte[] bytes) {
         JsonNode deserialized = null;

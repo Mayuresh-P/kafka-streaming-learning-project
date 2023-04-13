@@ -6,7 +6,6 @@ import org.pl.producer.DataIngestionProducer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -20,10 +19,7 @@ import java.io.IOException;
 @Transactional(Transactional.TxType.SUPPORTS)
 public class CustomerAndSalesDataController {
 
-    DataIngestionProducer producer;
-
     public static final Logger logger = LoggerFactory.getLogger(CustomerAndSalesDataController.class.getSimpleName());
-
 
     @POST
     @Path("/addCustomerData")
@@ -31,10 +27,14 @@ public class CustomerAndSalesDataController {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response addCustomerData(Customer customer) throws IOException {
 
+        DataIngestionProducer producer = new DataIngestionProducer();
+
         logger.info(customer.getCustomerId() + " " +
                 customer.getName());
 
-        producer.produceCustomer(customer);
+//        producer.produceCustomer(customer);
+
+        producer.produce(customer);
 
         return Response.accepted(customer).build();
 
@@ -46,10 +46,26 @@ public class CustomerAndSalesDataController {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response addSalesData(Sales sale) throws IOException {
 
-        producer.produceSales(sale);
+        DataIngestionProducer producer = new DataIngestionProducer();
+
+//        producer.produceSales(sale);
+
+        producer.produce(sale);
 
         return Response.accepted(sale).build();
 
+    }
+
+    @POST
+    @Path("/addDataThroughFiles")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response addData() throws IOException {
+        DataIngestionProducer producer = new DataIngestionProducer();
+
+        producer.produce(Object.class);
+
+        return Response.accepted("Successfully added data").build();
     }
 
 }

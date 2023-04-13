@@ -1,21 +1,20 @@
 package org.pl.joiner;
 
 import org.apache.kafka.streams.kstream.ValueJoiner;
-import org.pl.entities.AllData;
+import org.pl.entities.CustomerSales;
 import org.pl.entities.Customer;
 import org.pl.entities.Sales;
-import org.pl.entities.TotalSales;
 
-public class Joiner implements ValueJoiner<Customer, Sales, AllData> {
+public class Joiner implements ValueJoiner<Customer, Sales, CustomerSales> {
 
     @Override
-    public AllData apply(Customer customer, Sales sales) {
+    public CustomerSales apply(Customer customer, Sales sales) {
         return null;
     }
 
-    public AllData joinAllData(Customer customer, Sales sales) {
+    public CustomerSales joinAllData(Customer customer, Sales sales) {
 
-        AllData data = new AllData();
+        CustomerSales data = new CustomerSales();
 
         data.setCustomerId(customer.getCustomerId());
         data.setSalesId(sales.getSalesId());
@@ -32,14 +31,14 @@ public class Joiner implements ValueJoiner<Customer, Sales, AllData> {
 
     }
 
-    public TotalSales joinTotalSales(AllData allData, TotalSales totalSales) {
-
-        TotalSales sales = new TotalSales();
-
-        sales.setTotalSales(totalSales.getTotalSales() + allData.getPrice());
-        sales.setProductCategory(allData.getProductCategory());
-
-        return sales;
-    }
+//    public TotalSalesByCategory joinTotalSales(CustomerSales customerSales, TotalSalesByCategory totalSales) {
+//
+//        TotalSalesByCategory sales = new TotalSalesByCategory();
+//
+//        sales.setTotalSales(totalSales.getTotalSales() + customerSales.getPrice());
+//        sales.setProductCategory(customerSales.getProductCategory());
+//
+//        return sales;
+//    }
 
 }

@@ -8,7 +8,7 @@ import java.util.Date;
 
 @Data
 @NoArgsConstructor
-public class AllData {
+public class CustomerSales {
 
     @JsonProperty
     private int customerId;
