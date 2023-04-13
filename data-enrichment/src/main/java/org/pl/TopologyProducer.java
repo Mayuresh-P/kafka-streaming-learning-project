@@ -2,11 +2,14 @@ package org.pl;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
+import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.kstream.*;
 import org.apache.kafka.streams.state.*;
+import org.pl.aggregator.TotalSalesByCategoryAggregator;
 import org.pl.entities.Customer;
 import org.pl.entities.CustomerSales;
 import org.pl.entities.Sales;
@@ -28,7 +31,7 @@ public class TopologyProducer {
     private static final String SALES_TOPIC = "sales-data";
 
     private static final String SALES_CUSTOMER_STORE = "customer-sales-store";
-
+    private static final String TOTAL_SALES_BY_CATEGORY_STORE = "total-sales-by-category-store";
     final ForeachAction<Integer, CustomerSales> loggingForEach = (key, value) -> {
         if (value != null)
             logger.info("Key: {}, Value: {}", key, value);
@@ -52,11 +55,11 @@ public class TopologyProducer {
 //        return Serdes.serdeFrom(tSerializer, tDeserializer);
 //    }
 
-    private static final CustomSerde<Customer> customerSerde = new CustomSerde<>(Customer.class);
-    private static final CustomSerde<Sales> salesSerde = new CustomSerde<>(Sales.class);
-    private static final CustomSerde<CustomerSales> customerSalesSerde = new CustomSerde<>(CustomerSales.class);
+    private static final Serde<Customer> customerSerde = new CustomSerde<>(Customer.class).generateSerde();
+    private static final Serde<Sales> salesSerde = new CustomSerde<>(Sales.class).generateSerde();
+    private static final Serde<CustomerSales> customerSalesSerde = new CustomSerde<>(CustomerSales.class).generateSerde();
 
-    private static final CustomSerde<TotalSalesByCategory> totalSalesByCategorySerde = new CustomSerde<>(TotalSalesByCategory.class);
+    private static final Serde<TotalSalesByCategory> totalSalesByCategorySerde = new CustomSerde<>(TotalSalesByCategory.class).generateSerde();
 
     @Produces
     public Topology buildTopology() {
@@ -68,10 +71,10 @@ public class TopologyProducer {
 
         final GlobalKTable<Integer, Customer> customers = builder.globalTable(CUSTOMER_TOPIC, Materialized.<Integer, Customer>as(storeSupplier)
                 .withKeySerde(Serdes.Integer())
-                .withValueSerde(customerSerde.generateSerde())
+                .withValueSerde(customerSerde)
         );
 
-        final KStream<Integer, Sales> salesStream = builder.stream(SALES_TOPIC, Consumed.with(Serdes.Integer(),salesSerde.generateSerde()));
+        final KStream<Integer, Sales> salesStream = builder.stream(SALES_TOPIC, Consumed.with(Serdes.Integer(),salesSerde));
 
 
         salesStream
@@ -80,25 +83,26 @@ public class TopologyProducer {
                 (salesKey, salesValue) -> salesValue.getCustomerId(),
                 (salesValue, customerValue) ->
                         new CustomerSales(
-                                mapper.convertValue(customerValue, Customer.class),
-                                mapper.convertValue(salesValue, Sales.class)
+                                customerValue,
+                                salesValue
                         ))
                 .peek(loggingForEach)
-                .to("customer-sales", Produced.with(Serdes.Integer(), customerSalesSerde.generateSerde()));
+                .to("customer-sales", Produced.with(Serdes.Integer(), customerSalesSerde));
 
 
         KStream<String, TotalSalesByCategory> totalSalesByCategoryKStream = builder.stream("customer-sales",
-                Consumed.with(Serdes.Integer(), customerSalesSerde.generateSerde()))
-                .groupBy((key, customerSales) -> customerSales.getProductCategory())
+                Consumed.with(Serdes.Integer(), customerSalesSerde))
+                .selectKey((key, customerSales)-> customerSales.getProductCategory().toLowerCase())
+                .groupByKey(Grouped.with(Serdes.String(), customerSalesSerde))
                 .aggregate(
-                        () -> new TotalSalesByCategory(),
-                        (key, value, aggregatedValue) -> new TotalSalesByCategory(key, aggregatedValue.getTotalSales()+(value.getQuantity()*value.getPrice())),
-                        Materialized.with(Serdes.String(), totalSalesByCategorySerde.generateSerde())
+                        TotalSalesByCategory::new,
+                        new TotalSalesByCategoryAggregator(),
+                        TopologyUtils.materialize(TotalSalesByCategory.class, TOTAL_SALES_BY_CATEGORY_STORE, false)
                 )
                 .toStream()
                 .peek((key, value) -> System.out.println(key+ " "+ value));
 
-        totalSalesByCategoryKStream.to("total-sales-by-category",Produced.with(Serdes.String(), totalSalesByCategorySerde.generateSerde()));
+        totalSalesByCategoryKStream.to("total-sales-by-category",Produced.with(Serdes.String(), totalSalesByCategorySerde));
 
         Topology build = builder.build();
         logger.info(build.describe().toString());

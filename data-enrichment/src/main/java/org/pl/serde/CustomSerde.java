@@ -9,7 +9,7 @@ import org.pl.serializer.JsonSerializer;
 
 public class CustomSerde <T>{
     private final Class<T> t;
-    Serde<T> serde;
+//    Serde<T> serde;
 
     public CustomSerde(Class<T> t) {
         this.t = t;
