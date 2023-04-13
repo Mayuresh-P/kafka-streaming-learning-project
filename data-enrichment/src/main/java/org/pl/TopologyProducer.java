@@ -14,6 +14,7 @@ import org.pl.entities.Customer;
 import org.pl.entities.CustomerSales;
 import org.pl.entities.Sales;
 import org.pl.entities.TotalSalesByCategory;
+import org.pl.pipelines.DataEnrichmentPipeline;
 import org.pl.serde.CustomSerde;
 import org.pl.serde.JSONSerde;
 import org.slf4j.Logger;
@@ -21,6 +22,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
+import javax.inject.Inject;
 
 
 @ApplicationScoped
@@ -59,7 +61,12 @@ public class TopologyProducer {
     private static final Serde<Sales> salesSerde = new CustomSerde<>(Sales.class).generateSerde();
     private static final Serde<CustomerSales> customerSalesSerde = new CustomSerde<>(CustomerSales.class).generateSerde();
 
-    private static final Serde<TotalSalesByCategory> totalSalesByCategorySerde = new CustomSerde<>(TotalSalesByCategory.class).generateSerde();
+//    private static final Serde<TotalSalesByCategory> totalSalesByCategorySerde = new CustomSerde<>(TotalSalesByCategory.class).generateSerde();
+
+
+    @Inject
+    DataEnrichmentPipeline dataEnrichmentPipeline;
+
 
     @Produces
     public Topology buildTopology() {
@@ -67,7 +74,6 @@ public class TopologyProducer {
 
         KeyValueBytesStoreSupplier storeSupplier = Stores.persistentKeyValueStore(SALES_CUSTOMER_STORE);
 
-        final ObjectMapper mapper = new ObjectMapper();
 
         final GlobalKTable<Integer, Customer> customers = builder.globalTable(CUSTOMER_TOPIC, Materialized.<Integer, Customer>as(storeSupplier)
                 .withKeySerde(Serdes.Integer())
@@ -89,86 +95,31 @@ public class TopologyProducer {
                 .peek(loggingForEach)
                 .to("customer-sales", Produced.with(Serdes.Integer(), customerSalesSerde));
 
+        KStream<Integer, CustomerSales> customerSalesKStream = builder.stream("customer-sales", Consumed.with(Serdes.Integer(), customerSalesSerde));
 
-        KStream<String, TotalSalesByCategory> totalSalesByCategoryKStream = builder.stream("customer-sales",
-                Consumed.with(Serdes.Integer(), customerSalesSerde))
-                .selectKey((key, customerSales)-> customerSales.getProductCategory().toLowerCase())
-                .groupByKey(Grouped.with(Serdes.String(), customerSalesSerde))
-                .aggregate(
-                        TotalSalesByCategory::new,
-                        new TotalSalesByCategoryAggregator(),
-                        TopologyUtils.materialize(TotalSalesByCategory.class, TOTAL_SALES_BY_CATEGORY_STORE, false)
-                )
-                .toStream()
-                .peek((key, value) -> System.out.println(key+ " "+ value));
 
-        totalSalesByCategoryKStream.to("total-sales-by-category",Produced.with(Serdes.String(), totalSalesByCategorySerde));
+        dataEnrichmentPipeline.generateTotalSalesByCategory(customerSalesKStream);
+
+        dataEnrichmentPipeline.generateTotalSalesByCustomerAge(customerSalesKStream);
+
+//        KStream<String, TotalSalesByCategory> totalSalesByCategoryKStream = builder.stream("customer-sales",
+//                Consumed.with(Serdes.Integer(), customerSalesSerde))
+//                .selectKey((key, customerSales)-> customerSales.getProductCategory().toLowerCase())
+//                .groupByKey(Grouped.with(Serdes.String(), customerSalesSerde))
+//                .aggregate(
+//                        TotalSalesByCategory::new,
+//                        new TotalSalesByCategoryAggregator(),
+//                        TopologyUtils.materialize(TotalSalesByCategory.class, TOTAL_SALES_BY_CATEGORY_STORE, false)
+//                )
+//                .toStream()
+//                .peek((key, value) -> System.out.println(key+ " "+ value));
+//
+//        totalSalesByCategoryKStream.to("total-sales-by-category",Produced.with(Serdes.String(), totalSalesByCategorySerde));
+
+
 
         Topology build = builder.build();
         logger.info(build.describe().toString());
         return build;
     }
 }
-
-//        ValueJoiner<JsonNode, JsonNode, JsonNode> customerSalesJoiner = (salesJSON, customerJSON) -> {
-//            Customer customer = null;
-//            Sales sales = null;
-//            try{
-////                customer = mapper.treeToValue(customerJSON, Customer.class);
-//                customer = mapper.treeToValue(customerJSON, Customer.class);
-//                sales = mapper.treeToValue(salesJSON, Sales.class)
-//                CustomerSales updatedCustomerSales = new CustomerSales();
-//                updatedCustomerSales.setSalesId(sales.getSalesId());
-//                updatedCustomerSales.setProductCategory(sales.getProductCategory());
-//                updatedCustomerSales.setTimestamp(sales.getTimestamp());
-//                updatedCustomerSales.setQuantity(sales.getQuantity());
-//                updatedCustomerSales.setPrice(sales.getPrice());
-//                updatedCustomerSales.setProductId(sales.getProductId());
-//                updatedCustomerSales.setCustomerId(sales.getCustomerId());
-//                if(customer != null){
-//                    updatedCustomerSales.setAge(customer.getAge());
-//                    updatedCustomerSales.setGender(customer.getGender());
-//                    updatedCustomerSales.setName(customer.getName());
-//                }
-//                return updatedCustomerSales;
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//            return null;
-//
-//        };
-
-//        KeyValueMapper<Integer,JsonNode, JsonNode> customerSalesKeyValueMapper = (saleId, customer)-> {
-//
-////            CustomerSales customerSales = new SalesCustomerJoiner().apply(saleId,customer);
-////            JsonNode customerSalesJson = mapper.convertValue(customerSales, JsonNode.class);
-//            KeyValue customerSalesKV = KeyValue.pair(saleId, customer);
-//            return customerSalesKV;
-//        };
-
-//        final KStream<Integer,JsonNode> customerSalesStream =
-//                salesStream
-//                        .leftJoin(customerTable,
-//                                (salesKey, salesValue)-> salesKey,
-//                                (sales, customer)-> {
-//                                    try {
-//                                        return mapper.convertValue(new SalesCustomerJoiner()
-//                                                .apply(mapper.treeToValue(sales, Sales.class),mapper.treeToValue(customer, Customer.class)), JsonNode.class);
-//                                    } catch (JsonProcessingException e) {
-//                                        throw new RuntimeException(e);
-//                                    }
-//                                });
-//        customerSalesStream
-//                        .to("customer-sales",Produced.with(new Serdes.IntegerSerde(), new JSONSerde()));
-//        customerSalesStream.peek((key,value)->System.out.println(key+" "+value));
-//        final KStream<Integer, JsonNode> customerSales = builder.stream("customer-sales", Consumed.with(Serdes.Integer(), new JSONSerde()));
-//        customerSales.print(Printed.toSysOut());
-//Map<String, String> changeLogConfig = new HashMap<>();
-//    KeyValueBytesStoreSupplier storeSupplier = Stores.persistentKeyValueStore("customerSalesStore");
-//    StoreBuilder<KeyValueStore<Integer, JsonNode>> stateStore = Stores.keyValueStoreBuilder(storeSupplier, Serdes.Integer(), new JSONSerde()).withLoggingEnabled(changeLogConfig);
-//    final SalesCustomerJoiner joiner = new SalesCustomerJoiner();
-//    final KStream<Integer, JsonNode> salesStream =
-//            builder.stream(SALES_TOPIC, Consumed.with(Serdes.Integer(), new JSONSerde())).peek((key, value)-> System.out.println(key.toString()+" "+value.toString()))
-//            ;
-//    final GlobalKTable<Integer, JsonNode> customerTable = builder.globalTable(CUSTOMER_TOPIC, Consumed.with(Serdes.Integer(), new JSONSerde()));
-//        salesStream.peek((key,value)-> System.out.println(key+" "+value));
