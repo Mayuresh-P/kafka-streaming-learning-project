@@ -1,5 +1,8 @@
 package org.pl.entities;
 
+import lombok.Data;
+
+@Data
 public class SalesByCustomerAge {
     private String ageSegment;
     private int totalSales;

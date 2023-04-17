@@ -13,7 +13,8 @@ public class TotalSalesByCategoryAggregator implements Aggregator<String, Custom
 
         System.out.println(customerSales.getPrice()+" "+customerSales.getQuantity()+" "+totalSalesByCategory.getTotalSales());
 
-        return new TotalSalesByCategory(s, totalSalesByCategory.getTotalSales()+(customerSales.getPrice()*customerSales.getQuantity()));
+        return totalSalesByCategory.aggregate(s,(customerSales.getPrice()*customerSales.getQuantity()) );
+//                new TotalSalesByCategory(s, totalSalesByCategory.getTotalSales()+(customerSales.getPrice()*customerSales.getQuantity()));
 
     }
 }

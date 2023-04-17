@@ -22,6 +22,12 @@ public class TotalSalesByCategory {
         this.totalSales = totalSales;
     }
 
+    public TotalSalesByCategory aggregate(String category, int currentSales){
+        this.category = category;
+        this.totalSales += currentSales;
+        return  this;
+    }
+
     public int getTotalSales() {
         return totalSales;
     }
@@ -29,6 +35,8 @@ public class TotalSalesByCategory {
     public void setTotalSales(int totalSales) {
         this.totalSales = totalSales;
     }
+
+
 
 
 }

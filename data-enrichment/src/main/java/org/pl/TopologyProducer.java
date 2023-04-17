@@ -8,12 +8,9 @@ import org.apache.kafka.streams.kstream.*;
 import org.apache.kafka.streams.state.KeyValueBytesStoreSupplier;
 import org.apache.kafka.streams.state.Stores;
 import org.pl.aggregator.TotalSalesByCategoryAggregator;
+import org.pl.entities.*;
 import org.pl.pipelines.DataEnrichmentPipeline;
 import org.pl.util.TopologyUtils;
-import org.pl.entities.CustomerSales;
-import org.pl.entities.Customer;
-import org.pl.entities.Sales;
-import org.pl.entities.TotalSalesByCategory;
 import org.pl.joiner.Joiner;
 import org.pl.serde.CustomSerde;
 import org.pl.util.ApplicationProperties;
@@ -90,7 +87,7 @@ public class TopologyProducer {
                 ).aggregate(
                         TotalSalesByCategory::new,
                         new TotalSalesByCategoryAggregator(),
-                        TopologyUtils.materialize(TotalSalesByCategory.class, TOTAL_SALES_BY_CATEGORY_STORE, false)
+                        TopologyUtils.materialize(TotalSalesByCategory.class, TOTAL_SALES_BY_CATEGORY_STORE, true)
                 ).toStream()
                 .peek((k, v) -> System.out.println("key: " + k + ", value: " + v));
 
@@ -99,6 +96,10 @@ public class TopologyProducer {
         KStream<Integer, CustomerSales> customerSalesKStream = builder.stream("customer-sales", Consumed.with(Serdes.Integer(), customerSalesSerde));
 
         dataEnrichmentPipeline.generateTotalSalesByCustomerAge(customerSalesKStream);
+
+        dataEnrichmentPipeline.generateTotalSalesByCustomerGender(customerSalesKStream);
+
+
 
         Topology topology = builder.build();
 
