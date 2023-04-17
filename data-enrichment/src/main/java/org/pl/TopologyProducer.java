@@ -7,10 +7,7 @@ import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.kstream.*;
 import org.apache.kafka.streams.state.*;
-import org.pl.entities.Customer;
-import org.pl.entities.CustomerSales;
-import org.pl.entities.Sales;
-import org.pl.entities.TotalSalesByCategory;
+import org.pl.entities.*;
 import org.pl.serde.CustomSerde;
 import org.pl.serde.JSONSerde;
 import org.slf4j.Logger;
@@ -73,7 +70,7 @@ public class TopologyProducer {
 
         final KStream<Integer, Sales> salesStream = builder.stream(SALES_TOPIC, Consumed.with(Serdes.Integer(),salesSerde.generateSerde()));
 
-
+//Join Sales Kstream and Customer Ktable
         salesStream
                 .selectKey((key, value) -> value.getCustomerId())
                 .join(customers,
@@ -86,7 +83,24 @@ public class TopologyProducer {
                 .peek(loggingForEach)
                 .to("customer-sales", Produced.with(Serdes.Integer(), customerSalesSerde.generateSerde()));
 
+//Total and Avg Sales
+        KStream<Integer, SalesAggregate> salesAggregateKStream = builder.stream("customer-sales",
+                        Consumed.with(Serdes.Integer(), customerSalesSerde.generateSerde()))
+                .groupBy((key, value) -> value.getSalesId())
+                //.groupByKey()
+                .aggregate(
+                        ()->new SalesAggregate(0,0,0.0f),
+                        (key,value,aggValue)-> new SalesAggregate()
+                                .withTotal_sale_count(aggValue.getTotal_sale_count()+1)
+                                .withTotalSales(aggValue.getTotalSales()+(value.getPrice()*value.getQuantity()))
+                                .withAvgSales(aggValue.getTotalSales()/aggValue.getTotal_sale_count())
+                )
+                .toStream()
+                .peek((key, value) -> System.out.println(key+ " "+ value));
 
+        salesAggregateKStream.to("total-sales",Produced.with(Serdes.String(), salesAggregate.generateSerde()));
+
+//Aggregate of TotalSalesByCategory
         KStream<String, TotalSalesByCategory> totalSalesByCategoryKStream = builder.stream("customer-sales",
                 Consumed.with(Serdes.Integer(), customerSalesSerde.generateSerde()))
                 .groupBy((key, customerSales) -> customerSales.getProductCategory())
