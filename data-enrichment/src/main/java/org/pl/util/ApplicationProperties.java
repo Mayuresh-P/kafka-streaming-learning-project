@@ -24,4 +24,7 @@ public class ApplicationProperties {
     @ConfigProperty(name = "TOPIC_TOTAL_SALES")
     String totalSalesTopic;
 
+    @ConfigProperty(name = "TOPIC_CUSTOMER_SALES_AGE")
+    String customerSalesAgeTopic;
+
 }

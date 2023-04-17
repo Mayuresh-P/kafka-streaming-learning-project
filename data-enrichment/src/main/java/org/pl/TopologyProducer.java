@@ -7,9 +7,7 @@ import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.kstream.*;
 import org.apache.kafka.streams.state.KeyValueBytesStoreSupplier;
 import org.apache.kafka.streams.state.Stores;
-import org.pl.aggregator.TotalSalesByCategoryAggregator;
 import org.pl.pipelines.DataEnrichmentPipeline;
-import org.pl.util.TopologyUtils;
 import org.pl.entities.CustomerSales;
 import org.pl.entities.Customer;
 import org.pl.entities.Sales;
@@ -47,7 +45,6 @@ public class TopologyProducer {
 
     @Produces
     @POST
-    @Path("/startStream")
     public Topology buildTopology() {
 
         KeyValueBytesStoreSupplier storeSupplierForTopicSink = Stores
@@ -78,25 +75,9 @@ public class TopologyProducer {
                 .to(applicationProperties.getTopicSink(),
                         Produced.with(Serdes.Integer(), customerSalesSerde));
 
-        // TOTAL SALES
-
-        KStream<String, TotalSalesByCategory> totalSalesByCategoryKStream = builder.stream(
-                applicationProperties.getTopicSink(), Consumed.with(Serdes.Integer(), customerSalesSerde)
-        )
-                .selectKey(
-                    (k, v) -> v.getProductCategory().toLowerCase())
-                .groupByKey(
-                    Grouped.with(Serdes.String(), customerSalesSerde)
-                ).aggregate(
-                        TotalSalesByCategory::new,
-                        new TotalSalesByCategoryAggregator(),
-                        TopologyUtils.materialize(TotalSalesByCategory.class, TOTAL_SALES_BY_CATEGORY_STORE, false)
-                ).toStream()
-                .peek((k, v) -> System.out.println("key: " + k + ", value: " + v));
-
-        totalSalesByCategoryKStream.to(applicationProperties.getTotalSalesTopic(), Produced.with(Serdes.String(), totalSalesByCategory));
-
         KStream<Integer, CustomerSales> customerSalesKStream = builder.stream("customer-sales", Consumed.with(Serdes.Integer(), customerSalesSerde));
+
+        dataEnrichmentPipeline.generateTotalSalesByCategory(customerSalesKStream);
 
         dataEnrichmentPipeline.generateTotalSalesByCustomerAge(customerSalesKStream);
 

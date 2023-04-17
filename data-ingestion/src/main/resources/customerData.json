@@ -1,0 +1,38 @@
+[
+  {
+    "customerId": 1,
+    "gender": "male",
+    "name": "Mayuresh",
+    "age": 22
+  },
+  {
+    "customerId": 2,
+    "gender": "male",
+    "name": "Madhur",
+    "age": 22
+  },
+  {
+    "customerId": 3,
+    "gender": "female",
+    "name": "Neha",
+    "age": 23
+  },
+  {
+    "customerId": 4,
+    "gender": "male",
+    "name": "Surya",
+    "age": 24
+  },
+  {
+    "customerId": 5,
+    "gender": "female",
+    "name": "Asha",
+    "age": 22
+  },
+  {
+    "customerId": 6,
+    "gender": "male",
+    "name": "Saurabh",
+    "age": 25
+  }
+]

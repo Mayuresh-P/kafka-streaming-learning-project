@@ -12,6 +12,7 @@ import java.util.Map;
  * Class to deserialize the given object of Class type 'T'
  * @param <T> Parameter of class type 'T'
  */
+
 public class JsonDeserializer<T> implements Deserializer<T> {
 
     private final ObjectMapper objectMapper = new ObjectMapper();

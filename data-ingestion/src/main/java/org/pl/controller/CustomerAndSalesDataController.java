@@ -1,8 +1,16 @@
 package org.pl.controller;
 
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.common.serialization.IntegerDeserializer;
+import org.apache.kafka.common.serialization.Serdes;
+import org.apache.kafka.common.serialization.Serializer;
 import org.pl.entities.Customer;
 import org.pl.entities.Sales;
 import org.pl.producer.DataIngestionProducer;
+import org.pl.serialization.JsonDeserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,6 +22,11 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Properties;
 
 @Path("api")
 @Transactional(Transactional.TxType.SUPPORTS)
@@ -29,10 +42,8 @@ public class CustomerAndSalesDataController {
 
         DataIngestionProducer producer = new DataIngestionProducer();
 
-        logger.info(customer.getCustomerId() + " " +
+        logger.info("customerId: " + customer.getCustomerId() + " Name: " +
                 customer.getName());
-
-//        producer.produceCustomer(customer);
 
         producer.produce(customer);
 
@@ -48,7 +59,7 @@ public class CustomerAndSalesDataController {
 
         DataIngestionProducer producer = new DataIngestionProducer();
 
-//        producer.produceSales(sale);
+        logger.info("salesID: " + sale.getSalesId() + " productCategory: " + sale.getProductCategory());
 
         producer.produce(sale);
 

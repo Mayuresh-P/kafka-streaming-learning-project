@@ -22,7 +22,6 @@ public class JsonSerializer<T> implements Serializer<T> {
         objectMapper.registerModule(new JavaTimeModule());
     }
 
-
     @Override
     public byte[] serialize(final String topic, final T data) {
         if (data == null) {

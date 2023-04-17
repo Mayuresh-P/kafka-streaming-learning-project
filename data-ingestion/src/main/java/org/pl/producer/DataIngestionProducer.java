@@ -140,7 +140,7 @@ public class DataIngestionProducer {
 
         }
 
-        else if(obj.getClass() == Object.class){
+        else {
 
             // setup new kafka producer
             KafkaProducer<Integer, Sales> salesProducer = new KafkaProducer<>(properties);
@@ -163,7 +163,8 @@ public class DataIngestionProducer {
             salesRecords.forEach(record -> salesProducer.send(record, (metadata, exception) -> {
 
                 if (exception == null) {
-                    log.info("Key: " + record.key());
+                    log.info("Key: " + record.key() + " Topic: " + record.topic()
+                    );
                 } else {
                     log.error("Error while producing: " + exception);
                 }
@@ -184,7 +185,8 @@ public class DataIngestionProducer {
             customerRecords.forEach(record -> customerProducer.send(record, ((metadata, exception) -> {
 
                 if(exception == null) {
-                    log.info("Key: " + record.key());
+                    log.info("Key: " + record.key() + " Topic: " + record.topic()
+                    );
                 } else {
                     log.error("Error while producing: " + exception);
                 }

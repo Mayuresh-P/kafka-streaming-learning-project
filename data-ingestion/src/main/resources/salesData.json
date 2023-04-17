@@ -1,12 +1,11 @@
 [
-
   {
     "salesId": 101,
     "productId": 1001,
     "customerId": 1,
     "productCategory": "Sports",
-    "quantity": 500,
-    "price": 1990,
+    "quantity": 10,
+    "price": 10,
     "timestamp": "2023-04-01T08:00:00.409074500Z"
   },
   {
@@ -14,8 +13,8 @@
     "productId": 1002,
     "customerId": 2,
     "productCategory": "Clothing",
-    "quantity": 100,
-    "price": 9999,
+    "quantity": 10,
+    "price": 10,
     "timestamp": "2023-04-02T10:15:15.409074500Z"
   },
   {
@@ -23,8 +22,8 @@
     "productId": 1003,
     "customerId": 3,
     "productCategory": "Accessories",
-    "quantity": 121,
-    "price": 109,
+    "quantity": 10,
+    "price": 10,
     "timestamp": "2023-04-03T06:25:00.409074500Z"
   },
   {
@@ -32,8 +31,8 @@
     "productId": 1004,
     "customerId": 4,
     "productCategory": "Sports",
-    "quantity": 150,
-    "price": 299,
+    "quantity": 10,
+    "price": 10,
     "timestamp": "2023-04-04T05:40:15.409074500Z"
   },
   {
@@ -41,8 +40,8 @@
     "productId": 1005,
     "customerId": 5,
     "productCategory": "Clothing",
-    "quantity": 125,
-    "price": 499,
+    "quantity": 10,
+    "price": 10,
     "timestamp": "2023-04-04T06:45:00.409074500Z"
   },
   {
@@ -50,8 +49,8 @@
     "productId": 1006,
     "customerId": 6,
     "productCategory": "Accessories",
-    "quantity": 250,
-    "price": 239,
+    "quantity": 10,
+    "price": 10,
     "timestamp": "2023-04-05T12:45:15.409074500Z"
   },
   {
@@ -59,8 +58,8 @@
     "productId": 1007,
     "customerId": 1,
     "productCategory": "Clothing",
-    "quantity": 20,
-    "price": 569,
+    "quantity": 10,
+    "price": 10,
     "timestamp": "2023-04-06T03:45:15.409074500Z"
   },
   {
@@ -68,8 +67,8 @@
     "productId": 1008,
     "customerId": 2,
     "productCategory": "Sports",
-    "quantity": 120,
-    "price": 250,
+    "quantity": 10,
+    "price": 10,
     "timestamp": "2023-04-06T05:00:00.409074500Z"
   },
   {
@@ -77,8 +76,8 @@
     "productId": 1009,
     "customerId": 3,
     "productCategory": "Accessories",
-    "quantity": 50,
-    "price": 99,
+    "quantity": 10,
+    "price": 10,
     "timestamp": "2023-04-07T11:45:00.409074500Z"
   },
   {
@@ -86,9 +85,8 @@
     "productId": 1010,
     "customerId": 4,
     "productCategory": "Sports",
-    "quantity": 40,
-    "price": 699,
+    "quantity": 10,
+    "price": 10,
     "timestamp": "2023-04-08T01:44:15.409074500Z"
   }
-
 ]
