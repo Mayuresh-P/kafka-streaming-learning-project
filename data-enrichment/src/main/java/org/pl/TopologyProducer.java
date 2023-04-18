@@ -22,7 +22,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 
 @ApplicationScoped
-@Path("/api")
+
 public class TopologyProducer {
 
     @Inject
@@ -43,8 +43,6 @@ public class TopologyProducer {
     private static final String TOTAL_SALES_BY_CATEGORY_STORE = "total-sales-by-category-store";
 
     @Produces
-    @POST
-    @Path("/startStream")
     public Topology buildTopology() {
 
         KeyValueBytesStoreSupplier storeSupplierForTopicSink = Stores
